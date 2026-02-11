@@ -971,36 +971,247 @@ where:
 \end{align}
 \end{examplebox}
 
-% Add remaining chapters with same detailed treatment...
-% Due to length, showing structure for remaining parts:
+\part{High Dynamic Range and Color}
 
 \chapter{HDR Transfer Functions}
 \section{Perceptual Quantizer (PQ / ST.2084)}
-% Detailed PQ formulas, graphs, examples
+
+Perceptual Quantizer (PQ) is an \textbf{absolute} transfer function standardized in SMPTE ST.2084. It maps code values directly to absolute display luminance up to 10,000 nits and is designed so quantization steps track approximately constant visibility thresholds.
+
+\begin{formulabox}{ST.2084 EOTF and Inverse}
+\textbf{PQ EOTF (signal to luminance):}
+\begin{equation}
+L = 10000 \left[\frac{\max\left(V^{1/m_2}-c_1,0\right)}{c_2-c_3V^{1/m_2}}\right]^{1/m_1}
+\end{equation}
+
+\textbf{PQ inverse EOTF (luminance to signal):}
+\begin{equation}
+V = \left[\frac{c_1 + c_2\left(L/10000\right)^{m_1}}{1 + c_3\left(L/10000\right)^{m_1}}\right]^{m_2}
+\end{equation}
+
+with constants:
+\begin{align}
+m_1 &= \frac{2610}{16384} \approx 0.1593, &
+m_2 &= \frac{2523}{32} \approx 78.8438 \\
+c_1 &= \frac{3424}{4096} \approx 0.8359, &
+c_2 &= \frac{2413}{128} \approx 18.8516, &
+c_3 &= \frac{2392}{128} \approx 18.6875
+\end{align}
+\end{formulabox}
+
+\begin{examplebox}{Typical 10-bit PQ Code Values}
+Using ST.2084 inverse EOTF:
+\begin{itemize}
+  \item 100 nits: $V \approx 0.508$ (10-bit code $\approx 520$)
+  \item 1000 nits: $V \approx 0.752$ (10-bit code $\approx 769$)
+  \item 4000 nits: $V \approx 0.903$ (10-bit code $\approx 923$)
+\end{itemize}
+This non-linear allocation concentrates many code values in dark and mid tones where the eye is most sensitive.
+\end{examplebox}
 
 \section{Hybrid Log-Gamma (HLG / BT.2100)}
-% Detailed HLG formulas, comparison with PQ
+
+Hybrid Log-Gamma is a \textbf{relative} HDR transfer function designed for broadcast compatibility. It avoids static metadata and gracefully degrades on legacy SDR pipelines.
+
+\begin{formulabox}{HLG OETF (scene linear to signal)}
+For scene linear light $E$ normalized to reference white:
+\begin{equation}
+V = \begin{cases}
+\sqrt{3E}, & 0 \le E \le \frac{1}{12} \\
+a\ln(12E-b)+c, & \frac{1}{12} < E \le 1
+\end{cases}
+\end{equation}
+where:
+\begin{equation}
+a = 0.17883277,\quad b = 0.28466892,\quad c = 0.55991073
+\end{equation}
+\end{formulabox}
+
+\begin{definitionbox}{HLG System Gamma}
+In practical displays, HLG output is shaped by a system gamma:
+\begin{equation}
+\gamma_{\text{sys}} \approx 1.2 + 0.42\log_{10}\left(\frac{L_W}{1000}\right)
+\end{equation}
+where $L_W$ is peak display luminance in nits. Brighter displays use higher effective contrast expansion.
+\end{definitionbox}
+
+\begin{table}[H]
+\centering
+\caption{PQ vs HLG in Production Workflows}
+\label{tab:pq_hlg_comparison}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Property} & \textbf{PQ (ST.2084)} & \textbf{HLG (BT.2100)} \\
+\midrule
+Signal type & Absolute luminance & Relative scene-referred \\
+Metadata dependence & Common (MaxCLL/MaxFALL, dynamic) & None required \\
+Best use case & Streaming, disc, mastering & Live broadcast \\
+Backward SDR compatibility & Limited without tone mapping & Better graceful fallback \\
+Peak coding target & Up to 10,000 nits & Display-dependent \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \part{Color Science and Management}
+
 \chapter{CIE Color Spaces}
+
+\section{CIE XYZ Tristimulus System}
+Given spectral power distribution $S(\lambda)$ and CIE 1931 color matching functions $\bar{x},\bar{y},\bar{z}$:
+\begin{align}
+X &= k\int S(\lambda)\bar{x}(\lambda)\,d\lambda \\
+Y &= k\int S(\lambda)\bar{y}(\lambda)\,d\lambda \\
+Z &= k\int S(\lambda)\bar{z}(\lambda)\,d\lambda
+\end{align}
+$Y$ is proportional to photometric luminance and is the bridge between colorimetry and brightness.
+
+\begin{formulabox}{Chromaticity Coordinates}
+\begin{equation}
+x = \frac{X}{X+Y+Z},\quad y = \frac{Y}{X+Y+Z},\quad z = 1-x-y
+\end{equation}
+Chromaticity removes absolute luminance and keeps only hue/saturation information.
+\end{formulabox}
+
+\section{CIELAB Perceptual Space}
+
+CIELAB improves perceptual uniformity relative to XYZ for color-difference work:
+\begin{align}
+L^* &= 116f\left(\frac{Y}{Y_n}\right)-16 \\
+a^* &= 500\left[f\left(\frac{X}{X_n}\right)-f\left(\frac{Y}{Y_n}\right)\right] \\
+b^* &= 200\left[f\left(\frac{Y}{Y_n}\right)-f\left(\frac{Z}{Z_n}\right)\right]
+\end{align}
+with
+\begin{equation}
+f(t)=
+\begin{cases}
+t^{1/3}, & t>\delta^3 \\
+\frac{t}{3\delta^2} + \frac{4}{29}, & t\le\delta^3
+\end{cases}
+\quad\text{and}\quad \delta=\frac{6}{29}
+\end{equation}
+
+\begin{importantbox}{Engineering Note}
+Most imaging pipelines still compute with linear RGB/XYZ, but quality gates (panel binning, print proofing, camera tuning) are often set in $L^*a^*b^*$ or $L^*u^*v^*$ because Euclidean distances in those spaces better approximate visibility.
+\end{importantbox}
+
 \chapter{Chromatic Adaptation}
+
+\section{Bradford Transform}
+Chromatic adaptation maps tristimulus values from one illuminant to another while preserving perceived object color. The Bradford method is widely used in ICC workflows.
+
+\begin{formulabox}{Bradford Adaptation Equation}
+\begin{equation}
+\mathbf{X}_D = M_B^{-1}
+\begin{bmatrix}
+\frac{L_D}{L_S} & 0 & 0 \\
+0 & \frac{M_D}{M_S} & 0 \\
+0 & 0 & \frac{S_D}{S_S}
+\end{bmatrix}
+M_B\mathbf{X}_S
+\end{equation}
+where $\mathbf{X}_S=[X\ Y\ Z]^T$ and:
+\begin{equation}
+M_B=
+\begin{bmatrix}
+0.8951 & 0.2664 & -0.1614 \\
+-0.7502 & 1.7135 & 0.0367 \\
+0.0389 & -0.0685 & 1.0296
+\end{bmatrix}
+\end{equation}
+\end{formulabox}
+
+\begin{examplebox}{Practical Use}
+Common conversions include D65 $\leftrightarrow$ D50 when moving between display-referred workflows and ICC print profiles. Without adaptation, neutral grays drift warm/cool and color management fails even when primaries are correct.
+\end{examplebox}
+
 \chapter{Color Difference Metrics}
 
+\section{Delta E Families}
+\begin{formulabox}{Core Metrics}
+\textbf{CIE76:}
+\begin{equation}
+\Delta E_{76} = \sqrt{(\Delta L^*)^2 + (\Delta a^*)^2 + (\Delta b^*)^2}
+\end{equation}
+
+\textbf{CIE94/CIEDE2000:} weighted forms that correct non-uniformity in chroma and hue regions:
+\begin{equation}
+\Delta E_{00} = \sqrt{
+\left(\frac{\Delta L'}{k_LS_L}\right)^2 +
+\left(\frac{\Delta C'}{k_CS_C}\right)^2 +
+\left(\frac{\Delta H'}{k_HS_H}\right)^2 +
+R_T\left(\frac{\Delta C'}{k_CS_C}\right)\left(\frac{\Delta H'}{k_HS_H}\right)}
+\end{equation}
+\end{formulabox}
+
+\begin{table}[H]
+\centering
+\caption{Typical Interpretation of Color Differences}
+\label{tab:deltae_thresholds}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Delta E Range} & \textbf{Perceptual Meaning (Typical)} \\
+\midrule
+$< 1.0$ & Imperceptible in controlled viewing \\
+$1.0$--$2.0$ & Barely perceptible to trained observers \\
+$2.0$--$3.0$ & Perceptible, often acceptable in consumer displays \\
+$> 3.0$ & Clearly visible mismatch \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \part{Ambient Adaptation}
+
 \chapter{Reflection Physics}
+
+\section{Ambient Contrast Degradation}
+In real rooms, reflected ambient light dominates black level and sets practical contrast.
+
+\begin{formulabox}{Black Level Under Ambient Illumination}
+\begin{equation}
+L_{\text{black,eff}} = L_{\text{black,native}} + L_{\text{veiling}}
+\end{equation}
+\begin{equation}
+L_{\text{veiling}} \approx \frac{E_{\text{amb}}\rho_{\text{eff}}}{\pi}
+\end{equation}
+\begin{equation}
+CR_{\text{ambient}} = \frac{L_{\text{white}} + L_{\text{veiling}}}{L_{\text{black,native}} + L_{\text{veiling}}}
+\end{equation}
+\end{formulabox}
+
+\begin{examplebox}{Office Lighting Example}
+For $E_{\text{amb}}=500$ lux and $\rho_{\text{eff}}=0.015$:
+\begin{equation}
+L_{\text{veiling}} \approx \frac{500\times0.015}{\pi} \approx 2.39\ \text{nits}
+\end{equation}
+Even if a panel has near-zero native black, ambient veiling can cap effective contrast to only a few hundred to one.
+\end{examplebox}
+
 \chapter{True Tone Technology}
 
-% Appendices
-\appendix
-\chapter{Complete Formula Reference}
-\chapter{Standard Illuminants}
-\chapter{Color Matching Functions}
+\section{Adaptive White Point Control}
+True Tone style systems continuously estimate ambient illumination and adjust display white point to reduce chromatic mismatch between emitted and reflected content.
 
-% Back matter
-\backmatter
-\bibliographystyle{plain}
-% \bibliography{references}
+\begin{formulabox}{Ambient CCT Estimate and White-Point Blending}
+\textbf{McCamy CCT approximation (from measured chromaticity):}
+\begin{align}
+n &= \frac{x-0.3320}{0.1858-y} \\
+\text{CCT} &\approx 449n^3 + 3525n^2 + 6823.3n + 5520.33
+\end{align}
 
+\textbf{Blend between reference and ambient whites:}
+\begin{equation}
+\mathbf{W}_{\text{target}} = (1-\alpha)\mathbf{W}_{\text{ref}} + \alpha\mathbf{W}_{\text{amb}}
+\end{equation}
+\begin{equation}
+\alpha = \text{clip}\left(
+\frac{\log_2 E - \log_2 E_0}{\log_2 E_1 - \log_2 E_0},\,0,\,1
+\right)
+\end{equation}
+\end{formulabox}
+
+\begin{importantbox}{Stability Requirement}
+White-point transitions must be rate-limited and low-pass filtered; otherwise, users perceive flicker or ``breathing'' color temperature while moving between lighting zones.
+\end{importantbox}
 
 \chapter{Local Dimming and Blooming Control}
 \section{FALD vs Edge-Lit}
@@ -1020,24 +1231,74 @@ Thickness & Thicker & Thinner \\
 \end{tabular}
 \end{table}
 
+\section{Zone-Based Luminance Model}
+\begin{formulabox}{Backlight Convolution Model}
+For local dimming LCDs, output luminance is approximately:
+\begin{equation}
+L(x,y,t) \approx \sum_{z=1}^{N_z} h_z(x,y)\,B_z(t)\,T(x,y,t) + L_{\text{leak}}
+\end{equation}
+where:
+\begin{itemize}
+  \item $h_z(x,y)$ = optical spread function of zone $z$
+  \item $B_z(t)$ = zone backlight command
+  \item $T(x,y,t)$ = LCD transmittance for pixel $(x,y)$
+  \item $L_{\text{leak}}$ = panel leakage floor
+\end{itemize}
+\end{formulabox}
+
+\begin{importantbox}{Blooming Trade-off}
+Aggressive zone boosting increases highlight detail but also raises halo artifacts because each zone PSF spreads into neighboring dark pixels. Practical algorithms therefore include temporal and spatial regularization terms.
+\end{importantbox}
+
 \chapter{VR and AR Display Requirements}
+\section{Image Sharpness and Motion Requirements}
+\begin{formulabox}{Pixels-Per-Degree and Latency Budget}
+\textbf{Angular sampling density:}
+\begin{equation}
+\text{PPD} = \frac{N_{\text{horizontal}}}{\text{FOV}_{\text{horizontal}}}
+\end{equation}
+
+\textbf{Motion-to-photon latency:}
+\begin{equation}
+t_{\text{MTP}} = t_{\text{tracking}} + t_{\text{render}} + t_{\text{scanout}} + t_{\text{pixel}}
+\end{equation}
+\end{formulabox}
+
+\begin{examplebox}{Why PPD Matters}
+A headset with 2160 horizontal pixels and 100 degree horizontal FOV yields:
+\begin{equation}
+\text{PPD} = 2160/100 = 21.6
+\end{equation}
+This is significantly below foveal vision limits, which explains visible aliasing and the push toward micro-OLED and micro-LED microdisplays.
+\end{examplebox}
+
 \section{Minimum Specifications}
 \begin{itemize}
-\item Resolution: 1500+ PPI per eye (retinal)
+\item Resolution: 1500+ PPI panel class for compact optics
 \item Refresh rate: 90+ Hz (120+ preferred)
-\item Persistence: <3ms (avoid motion blur)
-\item Latency: <20ms (motion-to-photon)
+\item Persistence: <3 ms (reduce display-induced blur)
+\item Latency: <20 ms (motion-to-photon)
 \item Field of view: 90--110 degrees
-\item IPD adjustment: 58--72mm range
+\item IPD adjustment: 58--72 mm range
 \end{itemize}
 
 \chapter{Quantum Dot Technology}
 \section{Working Principle}
-Quantum dots (QDs) are semiconductor nanocrystals with size-tunable emission:
+Quantum dots (QDs) are semiconductor nanocrystals with size-tunable emission due to quantum confinement.
+
+\begin{formulabox}{Brus Approximation (Confinement Shift)}
 \begin{equation}
-\lambda_{\text{emission}} \propto \frac{1}{r^2}
+E_g(R) \approx E_{g,\text{bulk}} +
+\frac{\hbar^2\pi^2}{2R^2}\left(\frac{1}{m_e^*}+\frac{1}{m_h^*}\right) -
+\frac{1.8e^2}{4\pi\epsilon R}
 \end{equation}
-where $r$ is the QD radius (2--10 nm).
+Then:
+\begin{equation}
+\lambda_{\text{peak}} \approx \frac{hc}{E_g(R)}
+\end{equation}
+\end{formulabox}
+
+Smaller dots emit shorter wavelengths (blue shift), and larger dots emit longer wavelengths (red shift). Modern display films leverage narrow emission spectra (often 20--30 nm FWHM) for wider color gamut.
 
 \chapter{Micro-LED Future Technology}
 \section{Advantages Over OLED}
@@ -1049,17 +1310,46 @@ where $r$ is the QD radius (2--10 nm).
 \item Wider temperature range
 \end{itemize}
 
+\section{Mass Transfer Yield Challenge}
+\begin{formulabox}{Panel Yield Sensitivity}
+If each subpixel transfer has success probability $p$ and the panel requires $N$ subpixels:
+\begin{equation}
+Y_{\text{panel}} = p^N
+\end{equation}
+For a 4K RGB panel, $N \approx 3 \times 3840 \times 2160 = 24{,}883{,}200$.
+\end{formulabox}
+
+\begin{importantbox}{Manufacturing Implication}
+Even very high single-transfer yield can produce near-zero full-panel yield without redundancy and laser repair. This is why transfer, inspection, and repair tooling define micro-LED cost more than emitter physics alone.
+\end{importantbox}
+
 \chapter{Display Driver ICs}
 \section{Source Driver Architecture}
 The source driver must update all pixel voltages within one line time:
 \begin{equation}
 t_{\text{line}} = \frac{1}{f_r \times N_{\text{rows}}}
 \end{equation}
-For 4K60 (3840 × 2160):
+For 4K60 (3840 \times 2160):
 \begin{equation}
 t_{\text{line}} = \frac{1}{60 \times 2160} = 7.72 \, \mu\text{s}
 \end{equation}
 
+\section{Link Bandwidth Requirement}
+\begin{formulabox}{Raw Pixel Data Rate}
+\begin{equation}
+R_{\text{raw}} = N_x N_y f_r b_{\text{pp}}
+\end{equation}
+where $b_{\text{pp}}$ is bits per pixel.
+\end{formulabox}
+
+For 4K120 with 10-bit RGB ($b_{\text{pp}}=30$):
+\begin{equation}
+R_{\text{raw}} = 3840 \times 2160 \times 120 \times 30 \approx 29.9\ \text{Gb/s}
+\end{equation}
+Protocol overhead and blanking further increase required lane throughput.
+
+% Placeholder template chapters are kept in source history but excluded from build.
+\iffalse
 \chapter{Advanced Topic 1: Display Engineering}
 \section{Theoretical Foundation}
 This chapter covers critical aspect 1 of display technology with complete mathematical treatment and practical examples.
@@ -1739,7 +2029,9 @@ Standardized testing protocols ensure consistent results across laboratories.
 \section{Future Developments}
 Research directions include advanced materials, novel architectures, and 
 AI-driven optimization techniques.
-\end{document}
+\fi
+
+\part{Supplemental Advanced Topics}
 % Additional comprehensive chapters
 
 \chapter{Subpixel Rendering Algorithms}
@@ -1755,8 +2047,8 @@ ClearType (Microsoft) leverages RGB subpixel geometry to achieve 3× horizontal 
 \begin{tikzpicture}[scale=0.8]
   % Traditional grayscale antialiasing
   \begin{scope}
-    \foreach \x/\col in {0/0.0, 1/0.3, 2/0.7, 3/1.0, 4/0.7, 5/0.3, 6/0.0} {
-      \fill[black!\col*100] (\x,0) rectangle +(1,1);
+    \foreach \x/\col in {0/0, 1/30, 2/70, 3/100, 4/70, 5/30, 6/0} {
+      \fill[black!\col] (\x,0) rectangle +(1,1);
       \draw[gray] (\x,0) rectangle +(1,1);
     }
     \node[below] at (3.5,-0.3) {Grayscale Antialiasing};
@@ -1765,19 +2057,19 @@ ClearType (Microsoft) leverages RGB subpixel geometry to achieve 3× horizontal 
   % Subpixel rendering
   \begin{scope}[yshift=-2.5cm]
     \foreach \x/\r/\g/\b in {
-      0/0.0/0.0/0.0,
-      1/0.0/0.1/0.3,
-      2/0.3/0.5/0.7,
-      3/0.7/0.9/1.0,
-      4/1.0/1.0/1.0,
-      5/1.0/0.9/0.7,
-      6/0.7/0.5/0.3,
-      7/0.3/0.1/0.0,
-      8/0.0/0.0/0.0
+      0/0/0/0,
+      1/0/10/30,
+      2/30/50/70,
+      3/70/90/100,
+      4/100/100/100,
+      5/100/90/70,
+      6/70/50/30,
+      7/30/10/0,
+      8/0/0/0
     } {
-      \fill[red!\r*100] (\x*0.333,0) rectangle +(0.333,1);
-      \fill[green!\g*100] (\x*0.333+0.333,0) rectangle +(0.333,1);
-      \fill[blue!\b*100] (\x*0.333+0.666,0) rectangle +(0.333,1);
+      \fill[red!\r] (\x*0.333,0) rectangle +(0.333,1);
+      \fill[green!\g] (\x*0.333+0.333,0) rectangle +(0.333,1);
+      \fill[blue!\b] (\x*0.333+0.666,0) rectangle +(0.333,1);
       \draw[gray,thin] (\x*0.333,0) rectangle +(0.999,1);
     }
     \node[below] at (1.5,-0.3) {Subpixel Antialiasing (3× resolution)};
@@ -2128,3 +2420,58 @@ where:
 \caption{Content-dependent power consumption for OLED vs LCD. LCD power is nearly constant (backlight), while OLED scales with content brightness.}
 \end{figure}
 
+\appendix
+\chapter{Complete Formula Reference}
+
+\begin{table}[H]
+\centering
+\caption{Core Equations Used Throughout This Text}
+\label{tab:formula_reference}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Topic} & \textbf{Equation} & \textbf{Primary Use} \\
+\midrule
+Display gamma & $L=L_{\max}V^{\gamma}$ & SDR response modeling \\
+BT.1886 & $L=(aV+b)^{\gamma}$ & Reference EOTF with non-zero black \\
+PQ EOTF & ST.2084 nonlinearity & Absolute HDR luminance mapping \\
+HLG OETF & Piecewise sqrt/log & Broadcast HDR encoding \\
+Chromaticity & $x=X/(X+Y+Z)$, $y=Y/(X+Y+Z)$ & Gamut/white-point work \\
+Color difference & $\Delta E_{76}, \Delta E_{00}$ & Tolerance and quality control \\
+Ambient veiling & $L_v\approx E_{\text{amb}}\rho/\pi$ & Contrast prediction in real rooms \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\chapter{Standard Illuminants}
+
+\begin{table}[H]
+\centering
+\caption{Common CIE Illuminants in Display Workflows}
+\label{tab:illuminants}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Illuminant} & \textbf{Description} & \textbf{Approx. CCT (K)} & \textbf{Typical Use} \\
+\midrule
+A & Tungsten/incandescent reference & 2856 & Legacy lamp simulation \\
+D50 & Horizon daylight / warm daylight & 5003 & Print and ICC PCS workflows \\
+D55 & Mid-morning daylight & 5503 & Photography reference sets \\
+D65 & Noon daylight average & 6504 & sRGB/Rec.709/Rec.2020 white \\
+D75 & Cool daylight & 7504 & Niche viewing conditions \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\chapter{Color Matching Functions}
+
+The CIE 1931 2-degree color matching functions $\bar{x}(\lambda)$, $\bar{y}(\lambda)$, and $\bar{z}(\lambda)$ define the linear transform from spectra to XYZ tristimulus values. In practice:
+\begin{itemize}
+  \item $\bar{y}(\lambda)$ is aligned with photopic luminance sensitivity.
+  \item Numerical integration is usually implemented as a weighted sum over sampled wavelengths.
+  \item 10-degree observer data can be preferable for wide-field stimuli.
+\end{itemize}
+
+\backmatter
+\bibliographystyle{plain}
+% \bibliography{references}
+
+\end{document}
