@@ -1,0 +1,29 @@
+\chapter{Display Driver ICs}
+\section{Source Driver Architecture}
+The source driver must update all pixel voltages within one line time:
+\begin{equation}
+t_{\text{line}} = \frac{1}{f_r \times N_{\text{rows}}}
+\end{equation}
+For 4K60 (3840x2160):
+\begin{equation}
+t_{\text{line}} = \frac{1}{60 \times 2160} = 7.72 \, \mu\text{s}
+\end{equation}
+
+\section{Link Bandwidth Requirement}
+\begin{formulabox}{Raw Pixel Data Rate}
+\begin{equation}
+R_{\text{raw}} = N_x N_y f_r b_{\text{pp}}
+\end{equation}
+where $b_{\text{pp}}$ is bits per pixel.
+\end{formulabox}
+
+For 4K120 with 10-bit RGB ($b_{\text{pp}}=30$):
+\begin{equation}
+R_{\text{raw}} = 3840 \times 2160 \times 120 \times 30 \approx 29.9\ \text{Gb/s}
+\end{equation}
+Protocol overhead and blanking further increase required lane throughput.
+
+% Placeholder template chapters are kept in source history but excluded from build.
+
+% Additional comprehensive chapters
+

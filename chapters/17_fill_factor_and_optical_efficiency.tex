@@ -1,0 +1,52 @@
+\chapter{Fill Factor and Optical Efficiency}
+
+\section{Definitions}
+
+\begin{formulabox}{Key Metrics}
+\textbf{Fill Factor:}
+\begin{equation}
+  \text{FF} = \frac{A_{\text{active}}}{A_{\text{total}}}
+\end{equation}
+
+\textbf{Aperture Ratio (LCD):}
+\begin{equation}
+  \text{AR} = \frac{A_{\text{transmitting}}}{A_{\text{total}}}
+\end{equation}
+
+\textbf{Typical Values:}
+\begin{itemize}
+  \item LCD: FF = 60--70\%, AR = 5--8\%
+  \item OLED: FF = 70--85\%, AR = 100\% (emissive)
+\end{itemize}
+\end{formulabox}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.2]
+  \begin{axis}[
+    width=12cm,
+    height=7cm,
+    xlabel={Pixel Pitch ($\mu$m)},
+    ylabel={Fill Factor (\%)},
+    xmin=0, xmax=100,
+    ymin=50, ymax=90,
+    grid=major,
+    legend pos=south east
+  ]
+  
+  % LCD fill factor decreases with smaller pixels
+  \addplot[color=primarycolor, very thick, domain=20:100] 
+    {85 - 500/x};
+  \addlegendentry{OLED}
+  
+  \addplot[color=accentcolor, very thick, domain=20:100] 
+    {75 - 400/x};
+  \addlegendentry{LCD}
+  
+  \end{axis}
+\end{tikzpicture}
+\caption{Fill factor versus pixel pitch. Smaller pixels have lower fill factors due to fixed-size gaps and structures.}
+\end{figure}
+
+% Continue with many more chapters...
+

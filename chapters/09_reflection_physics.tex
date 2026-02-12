@@ -1,0 +1,27 @@
+\part{Ambient Adaptation}
+
+\chapter{Reflection Physics}
+
+\section{Ambient Contrast Degradation}
+In real rooms, reflected ambient light dominates black level and sets practical contrast.
+
+\begin{formulabox}{Black Level Under Ambient Illumination}
+\begin{equation}
+L_{\text{black,eff}} = L_{\text{black,native}} + L_{\text{veiling}}
+\end{equation}
+\begin{equation}
+L_{\text{veiling}} \approx \frac{E_{\text{amb}}\rho_{\text{eff}}}{\pi}
+\end{equation}
+\begin{equation}
+CR_{\text{ambient}} = \frac{L_{\text{white}} + L_{\text{veiling}}}{L_{\text{black,native}} + L_{\text{veiling}}}
+\end{equation}
+\end{formulabox}
+
+\begin{examplebox}{Office Lighting Example}
+For $E_{\text{amb}}=500$ lux and $\rho_{\text{eff}}=0.015$:
+\begin{equation}
+L_{\text{veiling}} \approx \frac{500\times0.015}{\pi} \approx 2.39\ \text{nits}
+\end{equation}
+Even if a panel has near-zero native black, ambient veiling can cap effective contrast to only a few hundred to one.
+\end{examplebox}
+

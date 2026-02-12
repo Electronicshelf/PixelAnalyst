@@ -1,0 +1,27 @@
+\chapter{True Tone Technology}
+
+\section{Adaptive White Point Control}
+True Tone style systems continuously estimate ambient illumination and adjust display white point to reduce chromatic mismatch between emitted and reflected content.
+
+\begin{formulabox}{Ambient CCT Estimate and White-Point Blending}
+\textbf{McCamy CCT approximation (from measured chromaticity):}
+\begin{align}
+n &= \frac{x-0.3320}{0.1858-y} \\
+\text{CCT} &\approx 449n^3 + 3525n^2 + 6823.3n + 5520.33
+\end{align}
+
+\textbf{Blend between reference and ambient whites:}
+\begin{equation}
+\mathbf{W}_{\text{target}} = (1-\alpha)\mathbf{W}_{\text{ref}} + \alpha\mathbf{W}_{\text{amb}}
+\end{equation}
+\begin{equation}
+\alpha = \text{clip}\left(
+\frac{\log_2 E - \log_2 E_0}{\log_2 E_1 - \log_2 E_0},\,0,\,1
+\right)
+\end{equation}
+\end{formulabox}
+
+\begin{importantbox}{Stability Requirement}
+White-point transitions must be rate-limited and low-pass filtered; otherwise, users perceive flicker or ``breathing'' color temperature while moving between lighting zones.
+\end{importantbox}
+

@@ -1,0 +1,62 @@
+\chapter{Manufacturing and Yield Optimization}
+
+\section{Process Variations}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+  \begin{axis}[
+    width=12cm,
+    height=7cm,
+    xlabel={Parameter Value},
+    ylabel={Probability Density},
+    grid=major,
+    legend pos=north west,
+    domain=-3:3,
+    samples=100
+  ]
+  
+  % Normal distribution
+  \addplot[color=primarycolor, very thick] 
+    {exp(-x^2/2)/sqrt(2*pi)};
+  \addlegendentry{Target distribution}
+  
+  % Acceptance region
+  \addplot[color=successcolor, fill=successcolor, fill opacity=0.2, domain=-1.5:1.5] 
+    {exp(-x^2/2)/sqrt(2*pi)} \closedcycle;
+  \addlegendentry{Acceptance region};
+  
+  % Rejection regions
+  \addplot[color=accentcolor, fill=accentcolor, fill opacity=0.2, domain=-3:-1.5] 
+    {exp(-x^2/2)/sqrt(2*pi)} \closedcycle;
+  \addplot[color=accentcolor, fill=accentcolor, fill opacity=0.2, domain=1.5:3] 
+    {exp(-x^2/2)/sqrt(2*pi)} \closedcycle;
+  
+  \end{axis}
+\end{tikzpicture}
+\caption{Process variation and yield. Tighter tolerances reduce yield and increase cost.}
+\end{figure}
+
+\section{Cost-Performance Trade-offs}
+
+\begin{formulabox}{Yield Model}
+\textbf{Area-limited yield:}
+\begin{equation}
+  Y = e^{-AD}
+\end{equation}
+
+where:
+\begin{itemize}
+  \item $Y$ = yield (fraction of good devices)
+  \item $A$ = device area
+  \item $D$ = defect density (defects per unit area)
+\end{itemize}
+
+\textbf{Implications:}
+\begin{itemize}
+  \item Larger displays have exponentially lower yields
+  \item Higher resolution (more area) reduces yield
+  \item Defect reduction is critical for profitability
+\end{itemize}
+\end{formulabox}
+

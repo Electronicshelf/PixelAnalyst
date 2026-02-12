@@ -1,0 +1,47 @@
+\chapter{HDR Tone Mapping}
+
+\section{Global Tone Mapping Operators}
+
+\subsection{Reinhard Operator}
+
+\begin{formulabox}{Reinhard Tone Mapping}
+\begin{equation}
+  L_d = \frac{L \cdot (1 + L/L_{\text{white}}^2)}{1 + L}
+\end{equation}
+
+where:
+\begin{itemize}
+  \item $L$ = input luminance (HDR)
+  \item $L_d$ = display luminance (SDR)
+  \item $L_{\text{white}}$ = smallest luminance mapped to white
+\end{itemize}
+\end{formulabox}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+  \begin{axis}[
+    width=12cm,
+    height=8cm,
+    xlabel={Input Luminance (HDR, log scale)},
+    ylabel={Output Luminance (SDR)},
+    xmode=log,
+    xmin=0.01, xmax=10000,
+    ymin=0, ymax=110,
+    grid=major,
+    legend pos=north west
+  ]
+  
+  \addplot[color=primarycolor, very thick, domain=0.01:10000, samples=200] 
+    {x*(1+x/100)/(1+x)};
+  \addlegendentry{Reinhard ($L_{\text{white}}=100$)}
+  
+  \addplot[color=successcolor, thick, dashed, domain=0.01:10000, samples=200] 
+    {x*(1+x/1000)/(1+x)};
+  \addlegendentry{Reinhard ($L_{\text{white}}=1000$)}
+  
+  \end{axis}
+\end{tikzpicture}
+\caption{Reinhard tone mapping operator for different white points.}
+\end{figure}
+

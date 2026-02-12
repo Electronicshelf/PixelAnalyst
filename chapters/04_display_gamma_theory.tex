@@ -1,0 +1,213 @@
+\part{Gamma and Transfer Functions}
+
+\chapter{Display Gamma Theory}
+
+\section{The Pure Power Law}
+
+\begin{formulabox}{Fundamental Gamma Relationship}
+\begin{equation}
+  L = L_{\max} V^{\gamma}
+\end{equation}
+where:
+\begin{itemize}
+  \item $L$ = output luminance [cd/m²]
+  \item $L_{\max}$ = maximum display luminance
+  \item $V$ = normalized input signal ($0 \le V \le 1$)
+  \item $\gamma$ = gamma exponent (typically 2.2 to 2.5)
+\end{itemize}
+\end{formulabox}
+
+\subsection{Historical Origin: CRT Physics}
+
+The gamma function originates from cathode ray tube (CRT) physics:
+
+\begin{equation}
+  L \propto I \propto V_g^{3/2} \times \text{(additional factors)} \approx V_g^{2.5}
+\end{equation}
+
+where $I$ is electron beam current and $V_g$ is grid voltage.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+  \begin{axis}[
+    width=12cm,
+    height=8cm,
+    xlabel={Input Signal $V$},
+    ylabel={Output Luminance (normalized)},
+    xmin=0, xmax=1,
+    ymin=0, ymax=1,
+    grid=major,
+    legend pos=north west,
+    legend style={fill=white, fill opacity=0.8}
+  ]
+  
+  \addplot[color=primarycolor, very thick, domain=0:1, samples=100] {x};
+  \addlegendentry{$\gamma = 1.0$ (linear)}
+  
+  \addplot[color=successcolor, very thick, domain=0:1, samples=100] {x^1.8};
+  \addlegendentry{$\gamma = 1.8$}
+  
+  \addplot[color=accentcolor, very thick, domain=0:1, samples=100] {x^2.2};
+  \addlegendentry{$\gamma = 2.2$ (sRGB)}
+  
+  \addplot[color=warningcolor, very thick, domain=0:1, samples=100] {x^2.4};
+  \addlegendentry{$\gamma = 2.4$ (BT.1886)}
+  
+  \addplot[color=codecolor, very thick, domain=0:1, samples=100] {x^2.6};
+  \addlegendentry{$\gamma = 2.6$}
+  
+  \end{axis}
+\end{tikzpicture}
+\caption{Gamma curves for different exponent values. Higher gamma produces darker midtones.}
+\label{fig:gamma_curves}
+\end{figure}
+
+\section{Bit Depth and Quantization}
+
+\begin{formulabox}{Perceptual Bit Depth Requirement}
+Number of JNDs (Just Noticeable Differences) across range $[L_{\min}, L_{\max}]$:
+\begin{equation}
+  N_{\text{JND}} = \frac{\ln(L_{\max}/L_{\min})}{\ln(1 + \Delta L/L)}
+\end{equation}
+
+For SDR (0.01 to 100 cd/m²) with $\Delta L/L = 0.01$:
+\begin{equation}
+  N_{\text{JND}} = \frac{\ln(10000)}{\ln(1.01)} \approx 924
+\end{equation}
+
+Required code values (with safety margin):
+\begin{equation}
+  N_{\text{codes}} = 1.5 \times N_{\text{JND}} \approx 1386
+\end{equation}
+
+Minimum bit depth:
+\begin{equation}
+  b = \log_2(1386) \approx 10.4 \text{ bits}
+\end{equation}
+
+\textbf{Therefore: 10-bit minimum for SDR without visible banding.}
+\end{formulabox}
+
+\begin{importantbox}{Gamma Encoding Benefit}
+Gamma encoding increases effective bit depth:
+\begin{equation}
+  b_{\text{effective}} \approx b \times \gamma
+\end{equation}
+
+Thus 8-bit gamma-encoded ($\gamma = 2.2$):
+\begin{equation}
+  b_{\text{effective}} \approx 8 \times 2.2 = 17.6 \text{ effective linear bits}
+\end{equation}
+
+This explains why 8-bit gamma-encoded images appear smooth while 8-bit linear shows severe banding. Gamma encoding is essentially a form of perceptually-motivated compression.
+\end{importantbox}
+
+\section{Standard Transfer Functions}
+
+\subsection{sRGB Standard}
+
+\begin{formulabox}{sRGB EOTF (Electro-Optical Transfer Function)}
+\begin{equation}
+  L = \begin{cases}
+    V / 12.92 & \text{if } V \le 0.04045 \\
+    \left[\frac{V + 0.055}{1.055}\right]^{2.4} & \text{otherwise}
+  \end{cases}
+\end{equation}
+
+\textbf{sRGB OETF (Opto-Electronic Transfer Function):}
+\begin{equation}
+  V = \begin{cases}
+    12.92 \times L & \text{if } L \le 0.0031308 \\
+    1.055 \times L^{1/2.4} - 0.055 & \text{otherwise}
+  \end{cases}
+\end{equation}
+
+\textbf{Properties:}
+\begin{itemize}
+  \item Linear segment near black avoids numerical instability
+  \item Power segment uses $\gamma = 2.4$
+  \item Effective average gamma $\approx 2.2$
+  \item $C^1$ continuous (both value and derivative match at transition)
+\end{itemize}
+\end{formulabox}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+  \begin{axis}[
+    width=12cm,
+    height=8cm,
+    xlabel={Input Signal $V$},
+    ylabel={Output Luminance $L$},
+    xmin=0, xmax=1,
+    ymin=0, ymax=1,
+    grid=major,
+    legend pos=north west
+  ]
+  
+  % sRGB EOTF
+  \addplot[color=primarycolor, very thick, domain=0:0.04045, samples=50] {x/12.92};
+  \addplot[color=primarycolor, very thick, domain=0.04045:1, samples=200] 
+    {((x+0.055)/1.055)^2.4};
+  \addlegendentry{sRGB EOTF}
+  
+  % Pure gamma 2.2 for comparison
+  \addplot[color=accentcolor, dashed, thick, domain=0:1, samples=100] {x^2.2};
+  \addlegendentry{Pure $\gamma = 2.2$}
+  
+  \end{axis}
+\end{tikzpicture}
+\caption{sRGB EOTF compared to pure power law. Note the linear segment near black.}
+\label{fig:srgb_eotf}
+\end{figure}
+
+\subsection{BT.1886 Reference EOTF}
+
+\begin{formulabox}{BT.1886 for Real Displays}
+Real displays have non-zero black level. BT.1886 accounts for this:
+\begin{equation}
+  L = (aV + b)^\gamma
+\end{equation}
+where:
+\begin{align}
+  a &= L_{\max}^{1/\gamma} - L_{\min}^{1/\gamma} \\
+  b &= L_{\min}^{1/\gamma}
+\end{align}
+
+\textbf{Verification of boundary conditions:}
+\begin{align}
+  L(0) &= b^\gamma = L_{\min} \quad \checkmark \\
+  L(1) &= (a + b)^\gamma = L_{\max} \quad \checkmark
+\end{align}
+
+\textbf{Recommended gamma:} $\gamma = 2.4$ (home viewing, dim surround)
+\end{formulabox}
+
+\begin{examplebox}{Example: Laptop Display}
+\textbf{Specifications:}
+\begin{itemize}
+  \item $L_{\max} = 500$ nits
+  \item $L_{\min} = 0.5$ nits (LCD backlight leakage)
+  \item $\gamma = 2.4$
+\end{itemize}
+
+\textbf{Calculate parameters:}
+\begin{align}
+  a &= 500^{1/2.4} - 0.5^{1/2.4} = 10.67 - 0.808 = 9.86 \\
+  b &= 0.5^{1/2.4} = 0.808
+\end{align}
+
+\textbf{Full EOTF:}
+\begin{equation}
+  L = (9.86V + 0.808)^{2.4}
+\end{equation}
+
+\textbf{Verification:}
+\begin{align}
+  V = 0: \quad L &= (0.808)^{2.4} = 0.5 \text{ nits} \quad \checkmark \\
+  V = 1: \quad L &= (10.67)^{2.4} = 500 \text{ nits} \quad \checkmark
+\end{align}
+\end{examplebox}
+
+

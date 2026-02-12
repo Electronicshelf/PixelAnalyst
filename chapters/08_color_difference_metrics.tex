@@ -1,0 +1,36 @@
+\chapter{Color Difference Metrics}
+
+\section{Delta E Families}
+\begin{formulabox}{Core Metrics}
+\textbf{CIE76:}
+\begin{equation}
+\Delta E_{76} = \sqrt{(\Delta L^*)^2 + (\Delta a^*)^2 + (\Delta b^*)^2}
+\end{equation}
+
+\textbf{CIE94/CIEDE2000:} weighted forms that correct non-uniformity in chroma and hue regions:
+\begin{equation}
+\Delta E_{00} = \sqrt{
+\left(\frac{\Delta L'}{k_LS_L}\right)^2 +
+\left(\frac{\Delta C'}{k_CS_C}\right)^2 +
+\left(\frac{\Delta H'}{k_HS_H}\right)^2 +
+R_T\left(\frac{\Delta C'}{k_CS_C}\right)\left(\frac{\Delta H'}{k_HS_H}\right)}
+\end{equation}
+\end{formulabox}
+
+\begin{table}[H]
+\centering
+\caption{Typical Interpretation of Color Differences}
+\label{tab:deltae_thresholds}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Delta E Range} & \textbf{Perceptual Meaning (Typical)} \\
+\midrule
+$< 1.0$ & Imperceptible in controlled viewing \\
+$1.0$--$2.0$ & Barely perceptible to trained observers \\
+$2.0$--$3.0$ & Perceptible, often acceptable in consumer displays \\
+$> 3.0$ & Clearly visible mismatch \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+

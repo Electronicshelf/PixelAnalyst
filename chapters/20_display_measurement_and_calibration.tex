@@ -1,0 +1,41 @@
+\chapter{Display Measurement and Calibration}
+
+\section{Equipment Requirements}
+
+\begin{table}[H]
+\centering
+\caption{Measurement Equipment Comparison}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Property} & \textbf{Colorimeter} & \textbf{Spectroradiometer} & \textbf{Spot Meter} \\
+\midrule
+Accuracy & Fair & Excellent & Good \\
+Speed & Fast & Slow & Fast \\
+Cost & \$200--1000 & \$5000--30000 & \$500--2000 \\
+Spectral data & No & Yes & No \\
+Best for & Calibration & Research & Field work \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Calibration Procedure}
+
+\begin{algorithm}[H]
+\caption{Display Calibration Workflow}
+\begin{algorithmic}[1]
+\State \textbf{Input:} Target white point, gamma, luminance
+\State \textbf{Output:} LUT (Look-Up Table)
+\State
+\State Warm up display for 30+ minutes
+\State Measure native white point and primaries
+\For{each gray level $i = 0$ to 255}
+  \State Display gray patch $i$
+  \State Measure luminance $L_{\text{measured}}$
+  \State Calculate $L_{\text{target}} = L_{\max} \cdot (i/255)^{\gamma}$
+  \State $\text{LUT}[i] = \text{inverse}(L_{\text{target}})$
+\EndFor
+\State Apply LUT to display
+\State Verify with test patterns
+\end{algorithmic}
+\end{algorithm}
+

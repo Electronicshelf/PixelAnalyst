@@ -1,0 +1,30 @@
+\chapter{Chromatic Adaptation}
+
+\section{Bradford Transform}
+Chromatic adaptation maps tristimulus values from one illuminant to another while preserving perceived object color. The Bradford method is widely used in ICC workflows.
+
+\begin{formulabox}{Bradford Adaptation Equation}
+\begin{equation}
+\mathbf{X}_D = M_B^{-1}
+\begin{bmatrix}
+\frac{L_D}{L_S} & 0 & 0 \\
+0 & \frac{M_D}{M_S} & 0 \\
+0 & 0 & \frac{S_D}{S_S}
+\end{bmatrix}
+M_B\mathbf{X}_S
+\end{equation}
+where $\mathbf{X}_S=[X\ Y\ Z]^T$ and:
+\begin{equation}
+M_B=
+\begin{bmatrix}
+0.8951 & 0.2664 & -0.1614 \\
+-0.7502 & 1.7135 & 0.0367 \\
+0.0389 & -0.0685 & 1.0296
+\end{bmatrix}
+\end{equation}
+\end{formulabox}
+
+\begin{examplebox}{Practical Use}
+Common conversions include D65 $\leftrightarrow$ D50 when moving between display-referred workflows and ICC print profiles. Without adaptation, neutral grays drift warm/cool and color management fails even when primaries are correct.
+\end{examplebox}
+

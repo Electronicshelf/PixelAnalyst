@@ -1,0 +1,37 @@
+\chapter{Local Dimming and Blooming Control}
+\section{FALD vs Edge-Lit}
+\begin{table}[H]
+\centering
+\caption{Local Dimming Comparison}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Feature} & \textbf{FALD} & \textbf{Edge-Lit} \\
+\midrule
+Zone count & 100--1000+ & 8--32 \\
+Contrast & 10,000--50,000:1 & 1,000--5,000:1 \\
+Blooming & Low & High \\
+Cost & High & Low \\
+Thickness & Thicker & Thinner \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Zone-Based Luminance Model}
+\begin{formulabox}{Backlight Convolution Model}
+For local dimming LCDs, output luminance is approximately:
+\begin{equation}
+L(x,y,t) \approx \sum_{z=1}^{N_z} h_z(x,y)\,B_z(t)\,T(x,y,t) + L_{\text{leak}}
+\end{equation}
+where:
+\begin{itemize}
+  \item $h_z(x,y)$ = optical spread function of zone $z$
+  \item $B_z(t)$ = zone backlight command
+  \item $T(x,y,t)$ = LCD transmittance for pixel $(x,y)$
+  \item $L_{\text{leak}}$ = panel leakage floor
+\end{itemize}
+\end{formulabox}
+
+\begin{importantbox}{Blooming Trade-off}
+Aggressive zone boosting increases highlight detail but also raises halo artifacts because each zone PSF spreads into neighboring dark pixels. Practical algorithms therefore include temporal and spatial regularization terms.
+\end{importantbox}
+
