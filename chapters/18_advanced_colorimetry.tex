@@ -1,0 +1,57 @@
+\chapter{Advanced Colorimetry}
+
+\section{Color Gamut Visualization}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=6]
+  % CIE 1931 chromaticity diagram (simplified)
+  \fill[blue!20] (0.15,0.06) -- (0.64,0.33) -- (0.30,0.60) -- cycle;
+  \draw[very thick, primarycolor] (0.15,0.06) -- (0.64,0.33) -- (0.30,0.60) -- cycle;
+  \node at (0.36,0.33) {sRGB};
+  
+  \fill[green!20, opacity=0.5] (0.08,0.02) -- (0.68,0.32) -- (0.21,0.71) -- cycle;
+  \draw[very thick, successcolor, dashed] (0.08,0.02) -- (0.68,0.32) -- (0.21,0.71) -- cycle;
+  \node[green!50!black] at (0.32,0.45) {Rec.2020};
+  
+  \draw[->] (0,0) -- (0.8,0) node[right] {$x$};
+  \draw[->] (0,0) -- (0,0.8) node[above] {$y$};
+  
+  \node[circle, fill=accentcolor, inner sep=1pt] at (0.3127,0.3290) {};
+  \node[above right] at (0.3127,0.3290) {\small D65};
+\end{tikzpicture}
+\caption{CIE 1931 chromaticity diagram showing sRGB and Rec.2020 gamuts.}
+\end{figure}
+
+\section{RGB to XYZ Matrix Derivation}
+
+\begin{formulabox}{Complete Derivation}
+\textbf{Given:} RGB primary chromaticities and white point
+
+\textbf{Step 1:} Construct primary matrix from chromaticities:
+\begin{equation}
+  P = \begin{bmatrix}
+    x_r/y_r & x_g/y_g & x_b/y_b \\
+    1 & 1 & 1 \\
+    (1-x_r-y_r)/y_r & (1-x_g-y_g)/y_g & (1-x_b-y_b)/y_b
+  \end{bmatrix}
+\end{equation}
+
+\textbf{Step 2:} White point in XYZ:
+\begin{equation}
+  \begin{bmatrix} X_w \\ Y_w \\ Z_w \end{bmatrix} = 
+  \begin{bmatrix} x_w/y_w \\ 1 \\ (1-x_w-y_w)/y_w \end{bmatrix}
+\end{equation}
+
+\textbf{Step 3:} Scale factors:
+\begin{equation}
+  \begin{bmatrix} S_R \\ S_G \\ S_B \end{bmatrix} = 
+  P^{-1} \begin{bmatrix} X_w \\ Y_w \\ Z_w \end{bmatrix}
+\end{equation}
+
+\textbf{Step 4:} Final RGB→XYZ matrix:
+\begin{equation}
+  M = P \cdot \text{diag}(S_R, S_G, S_B)
+\end{equation}
+\end{formulabox}
+

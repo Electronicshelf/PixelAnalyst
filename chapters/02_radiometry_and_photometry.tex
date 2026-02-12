@@ -1,0 +1,160 @@
+\chapter{Radiometry and Photometry}
+
+\section{Radiometric Quantities}
+
+Radiometry deals with the measurement of electromagnetic radiation from a purely physical perspective.
+
+\begin{table}[H]
+\centering
+\caption{Fundamental Radiometric Quantities}
+\label{tab:radiometric}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Quantity} & \textbf{Symbol} & \textbf{Unit} & \textbf{Definition} \\
+\midrule
+Radiant Energy & $Q_e$ & joule (J) & Total EM energy \\
+Radiant Flux & $\Phi_e$ & watt (W) & $dQ_e/dt$ \\
+Radiant Intensity & $I_e$ & W/sr & $d\Phi_e/d\Omega$ \\
+Radiance & $L_e$ & W/(sr·m²) & $d^2\Phi_e/(dA \cos\theta \, d\Omega)$ \\
+Irradiance & $E_e$ & W/m² & $d\Phi_e/dA$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Radiance: The Fundamental Display Quantity}
+
+\begin{definitionbox}{Radiance}
+Radiance $L_e$ is the flux per unit projected area per unit solid angle:
+\begin{equation}
+  L_e = \frac{d^2\Phi_e}{dA \cos\theta \, d\Omega}
+\end{equation}
+
+Key properties:
+\begin{itemize}
+  \item Describes brightness of a surface or light source
+  \item Invariant along ray paths in lossless media (conservation of étendue)
+  \item The quantity measured by cameras and seen by eyes
+  \item THE fundamental quantity for characterizing display emission
+\end{itemize}
+\end{definitionbox}
+
+\section{Photometric Quantities}
+
+Photometry weights radiometric measurements by human visual sensitivity.
+
+\begin{formulabox}{Photometric Conversion}
+Photometric quantities are derived from radiometric ones via:
+\begin{equation}
+  X_v = K_m \int_{\lambda} X_{e,\lambda}(\lambda) \, V(\lambda) \, d\lambda
+\end{equation}
+where:
+\begin{itemize}
+  \item $K_m = 683$ lm/W at 555 nm (peak photopic sensitivity)
+  \item $V(\lambda)$ = photopic luminous efficiency function
+  \item Integration typically over 380--780 nm
+\end{itemize}
+\end{formulabox}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+  \begin{axis}[
+    width=12cm,
+    height=7cm,
+    xlabel={Wavelength (nm)},
+    ylabel={Relative Luminous Efficiency $V(\lambda)$},
+    xmin=380, xmax=780,
+    ymin=0, ymax=1.1,
+    grid=major,
+    legend pos=north west
+  ]
+  
+  % Photopic (day vision)
+  \addplot[color=warningcolor, very thick, smooth, domain=380:780] 
+    {exp(-((x-555)/80)^2)};
+  \addlegendentry{Photopic $V(\lambda)$ (day)}
+  
+  % Scotopic (night vision) 
+  \addplot[color=primarycolor, dashed, thick, smooth, domain=380:650] 
+    {exp(-((x-507)/75)^2)};
+  \addlegendentry{Scotopic $V'(\lambda)$ (night)}
+  
+  \end{axis}
+\end{tikzpicture}
+\caption{CIE photopic and scotopic luminous efficiency functions. Note the blue shift in scotopic vision (Purkinje effect).}
+\label{fig:luminous_efficiency}
+\end{figure}
+
+\subsection{Luminance: Display Brightness}
+
+\begin{importantbox}{Critical Distinction}
+\textbf{Luminance} (cd/m² = nits) describes light \textit{emitted} from a display surface.
+
+\textbf{Illuminance} (lux = lm/m²) describes light \textit{incident} on a surface.
+
+Confusing these is a common error! A display with 500 nits luminance in a room with 500 lux illuminance does NOT mean they are equal -- they have different units and meanings.
+\end{importantbox}
+
+\begin{table}[H]
+\centering
+\caption{Typical Luminance and Illuminance Values}
+\label{tab:typical_values}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Condition/Device} & \textbf{Luminance (nits)} & \textbf{Illuminance (lux)} \\
+\midrule
+\multicolumn{3}{l}{\textit{Display Luminance (emitted):}} \\
+Cinema DCI projector & 48 & --- \\
+Laptop display (typical) & 300--500 & --- \\
+Smartphone (typical) & 500--1000 & --- \\
+HDR TV (peak) & 1000--4000 & --- \\
+\midrule
+\multicolumn{3}{l}{\textit{Ambient Illuminance (incident):}} \\
+Moonlight & --- & 0.1 \\
+Home lighting & --- & 100 \\
+Office lighting & --- & 500 \\
+Overcast day & --- & 10,000 \\
+Direct sunlight & --- & 100,000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Lambertian Reflection Model}
+
+\begin{formulabox}{Reflection from Display Surface}
+For a Lambertian (ideal diffuse) reflector with reflectance $\rho$ under illuminance $E_{\text{ambient}}$:
+\begin{equation}
+  L_{\text{reflected}} = \frac{E_{\text{ambient}} \times \rho}{\pi} \quad [\text{cd/m}^2]
+\end{equation}
+
+The $\pi$ factor arises from integrating Lambertian emission over the hemisphere.
+
+\textbf{Typical display reflectances:}
+\begin{itemize}
+  \item Glossy display: $\rho \approx 0.02$ to $0.04$ (2--4\%)
+  \item Anti-glare coating: $\rho \approx 0.01$ to $0.02$ (1--2\%)
+  \item Matte screen protector: $\rho \approx 0.05$ to $0.10$ (5--10\%)
+\end{itemize}
+\end{formulabox}
+
+\begin{examplebox}{Practical Example: Office Environment}
+Office with $E = 500$ lux, glossy display with $\rho = 0.04$:
+\begin{equation}
+  L_{\text{reflected}} = \frac{500 \times 0.04}{\pi} \approx 6.4 \text{ nits}
+\end{equation}
+
+This 6.4 nits adds to the display's black level, degrading contrast!
+
+For an OLED with native black level of 0.0005 nits:
+\begin{itemize}
+  \item Dark room contrast: $1000 / 0.0005 = 2{,}000{,}000:1$
+  \item Office contrast: $1000 / 6.4 = 156:1$
+\end{itemize}
+
+The ``infinite'' OLED contrast becomes 156:1 in typical office lighting.
+\end{examplebox}
+
+% ============================================================================
+% PART II: PIXEL ARCHITECTURE
+% ============================================================================
+

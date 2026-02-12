@@ -1,0 +1,42 @@
+\part{Color Science and Management}
+
+\chapter{CIE Color Spaces}
+
+\section{CIE XYZ Tristimulus System}
+Given spectral power distribution $S(\lambda)$ and CIE 1931 color matching functions $\bar{x},\bar{y},\bar{z}$:
+\begin{align}
+X &= k\int S(\lambda)\bar{x}(\lambda)\,d\lambda \\
+Y &= k\int S(\lambda)\bar{y}(\lambda)\,d\lambda \\
+Z &= k\int S(\lambda)\bar{z}(\lambda)\,d\lambda
+\end{align}
+$Y$ is proportional to photometric luminance and is the bridge between colorimetry and brightness.
+
+\begin{formulabox}{Chromaticity Coordinates}
+\begin{equation}
+x = \frac{X}{X+Y+Z},\quad y = \frac{Y}{X+Y+Z},\quad z = 1-x-y
+\end{equation}
+Chromaticity removes absolute luminance and keeps only hue/saturation information.
+\end{formulabox}
+
+\section{CIELAB Perceptual Space}
+
+CIELAB improves perceptual uniformity relative to XYZ for color-difference work:
+\begin{align}
+L^* &= 116f\left(\frac{Y}{Y_n}\right)-16 \\
+a^* &= 500\left[f\left(\frac{X}{X_n}\right)-f\left(\frac{Y}{Y_n}\right)\right] \\
+b^* &= 200\left[f\left(\frac{Y}{Y_n}\right)-f\left(\frac{Z}{Z_n}\right)\right]
+\end{align}
+with
+\begin{equation}
+f(t)=
+\begin{cases}
+t^{1/3}, & t>\delta^3 \\
+\frac{t}{3\delta^2} + \frac{4}{29}, & t\le\delta^3
+\end{cases}
+\quad\text{and}\quad \delta=\frac{6}{29}
+\end{equation}
+
+\begin{importantbox}{Engineering Note}
+Most imaging pipelines still compute with linear RGB/XYZ, but quality gates (panel binning, print proofing, camera tuning) are often set in $L^*a^*b^*$ or $L^*u^*v^*$ because Euclidean distances in those spaces better approximate visibility.
+\end{importantbox}
+

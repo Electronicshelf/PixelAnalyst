@@ -1,0 +1,23 @@
+\appendix
+
+\chapter{Complete Formula Reference}
+
+\begin{table}[H]
+\centering
+\caption{Core Equations Used Throughout This Text}
+\label{tab:formula_reference}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Topic} & \textbf{Equation} & \textbf{Primary Use} \\
+\midrule
+Display gamma & $L=L_{\max}V^{\gamma}$ & SDR response modeling \\
+BT.1886 & $L=(aV+b)^{\gamma}$ & Reference EOTF with non-zero black \\
+PQ EOTF & ST.2084 nonlinearity & Absolute HDR luminance mapping \\
+HLG OETF & Piecewise sqrt/log & Broadcast HDR encoding \\
+Chromaticity & $x=X/(X+Y+Z)$, $y=Y/(X+Y+Z)$ & Gamut/white-point work \\
+Color difference & $\Delta E_{76}, \Delta E_{00}$ & Tolerance and quality control \\
+Ambient veiling & $L_v\approx E_{\text{amb}}\rho/\pi$ & Contrast prediction in real rooms \\
+\bottomrule
+\end{tabular}
+\end{table}
+

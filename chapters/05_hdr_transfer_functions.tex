@@ -1,0 +1,82 @@
+\part{High Dynamic Range and Color}
+
+\chapter{HDR Transfer Functions}
+\section{Perceptual Quantizer (PQ / ST.2084)}
+
+Perceptual Quantizer (PQ) is an \textbf{absolute} transfer function standardized in SMPTE ST.2084. It maps code values directly to absolute display luminance up to 10,000 nits and is designed so quantization steps track approximately constant visibility thresholds.
+
+\begin{formulabox}{ST.2084 EOTF and Inverse}
+\textbf{PQ EOTF (signal to luminance):}
+\begin{equation}
+L = 10000 \left[\frac{\max\left(V^{1/m_2}-c_1,0\right)}{c_2-c_3V^{1/m_2}}\right]^{1/m_1}
+\end{equation}
+
+\textbf{PQ inverse EOTF (luminance to signal):}
+\begin{equation}
+V = \left[\frac{c_1 + c_2\left(L/10000\right)^{m_1}}{1 + c_3\left(L/10000\right)^{m_1}}\right]^{m_2}
+\end{equation}
+
+with constants:
+\begin{align}
+m_1 &= \frac{2610}{16384} \approx 0.1593, &
+m_2 &= \frac{2523}{32} \approx 78.8438 \\
+c_1 &= \frac{3424}{4096} \approx 0.8359, &
+c_2 &= \frac{2413}{128} \approx 18.8516, &
+c_3 &= \frac{2392}{128} \approx 18.6875
+\end{align}
+\end{formulabox}
+
+\begin{examplebox}{Typical 10-bit PQ Code Values}
+Using ST.2084 inverse EOTF:
+\begin{itemize}
+  \item 100 nits: $V \approx 0.508$ (10-bit code $\approx 520$)
+  \item 1000 nits: $V \approx 0.752$ (10-bit code $\approx 769$)
+  \item 4000 nits: $V \approx 0.903$ (10-bit code $\approx 923$)
+\end{itemize}
+This non-linear allocation concentrates many code values in dark and mid tones where the eye is most sensitive.
+\end{examplebox}
+
+\section{Hybrid Log-Gamma (HLG / BT.2100)}
+
+Hybrid Log-Gamma is a \textbf{relative} HDR transfer function designed for broadcast compatibility. It avoids static metadata and gracefully degrades on legacy SDR pipelines.
+
+\begin{formulabox}{HLG OETF (scene linear to signal)}
+For scene linear light $E$ normalized to reference white:
+\begin{equation}
+V = \begin{cases}
+\sqrt{3E}, & 0 \le E \le \frac{1}{12} \\
+a\ln(12E-b)+c, & \frac{1}{12} < E \le 1
+\end{cases}
+\end{equation}
+where:
+\begin{equation}
+a = 0.17883277,\quad b = 0.28466892,\quad c = 0.55991073
+\end{equation}
+\end{formulabox}
+
+\begin{definitionbox}{HLG System Gamma}
+In practical displays, HLG output is shaped by a system gamma:
+\begin{equation}
+\gamma_{\text{sys}} \approx 1.2 + 0.42\log_{10}\left(\frac{L_W}{1000}\right)
+\end{equation}
+where $L_W$ is peak display luminance in nits. Brighter displays use higher effective contrast expansion.
+\end{definitionbox}
+
+\begin{table}[H]
+\centering
+\caption{PQ vs HLG in Production Workflows}
+\label{tab:pq_hlg_comparison}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Property} & \textbf{PQ (ST.2084)} & \textbf{HLG (BT.2100)} \\
+\midrule
+Signal type & Absolute luminance & Relative scene-referred \\
+Metadata dependence & Common (MaxCLL/MaxFALL, dynamic) & None required \\
+Best use case & Streaming, disc, mastering & Live broadcast \\
+Backward SDR compatibility & Limited without tone mapping & Better graceful fallback \\
+Peak coding target & Up to 10,000 nits & Display-dependent \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+

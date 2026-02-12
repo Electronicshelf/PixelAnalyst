@@ -1,0 +1,32 @@
+\chapter{VR and AR Display Requirements}
+\section{Image Sharpness and Motion Requirements}
+\begin{formulabox}{Pixels-Per-Degree and Latency Budget}
+\textbf{Angular sampling density:}
+\begin{equation}
+\text{PPD} = \frac{N_{\text{horizontal}}}{\text{FOV}_{\text{horizontal}}}
+\end{equation}
+
+\textbf{Motion-to-photon latency:}
+\begin{equation}
+t_{\text{MTP}} = t_{\text{tracking}} + t_{\text{render}} + t_{\text{scanout}} + t_{\text{pixel}}
+\end{equation}
+\end{formulabox}
+
+\begin{examplebox}{Why PPD Matters}
+A headset with 2160 horizontal pixels and 100 degree horizontal FOV yields:
+\begin{equation}
+\text{PPD} = 2160/100 = 21.6
+\end{equation}
+This is significantly below foveal vision limits, which explains visible aliasing and the push toward micro-OLED and micro-LED microdisplays.
+\end{examplebox}
+
+\section{Minimum Specifications}
+\begin{itemize}
+\item Resolution: 1500+ PPI panel class for compact optics
+\item Refresh rate: 90+ Hz (120+ preferred)
+\item Persistence: <3 ms (reduce display-induced blur)
+\item Latency: <20 ms (motion-to-photon)
+\item Field of view: 90--110 degrees
+\item IPD adjustment: 58--72 mm range
+\end{itemize}
+

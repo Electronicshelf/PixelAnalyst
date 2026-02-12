@@ -1,0 +1,56 @@
+\chapter{Power Management}
+
+\section{OLED Power Modeling}
+
+\begin{formulabox}{OLED Power Consumption}
+\begin{equation}
+  P_{\text{display}} = \eta \cdot A \cdot \langle L \rangle + P_{\text{base}}
+\end{equation}
+
+where:
+\begin{itemize}
+  \item $\eta$ = power efficiency coefficient (W·m²/cd)
+  \item $A$ = display area (m²)
+  \item $\langle L \rangle$ = average pixel luminance (cd/m²)
+  \item $P_{\text{base}}$ = fixed power (driver, controller)
+\end{itemize}
+
+\textbf{Content dependence:}
+\begin{itemize}
+  \item White screen: Maximum power
+  \item Black screen: Minimum power (near zero for OLED)
+  \item Typical content: 30--50\% of maximum
+\end{itemize}
+\end{formulabox}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+  \begin{axis}[
+    ybar,
+    width=12cm,
+    height=7cm,
+    ylabel={Power (W)},
+    symbolic x coords={Black, Dark UI, Mixed, Web, White},
+    xtick=data,
+    nodes near coords,
+    grid=major,
+    ymin=0,
+    legend pos=north west
+  ]
+  
+  \addplot[fill=primarycolor] coordinates {
+    (Black,0.5) (Dark UI,1.2) (Mixed,2.1) (Web,3.5) (White,5.2)
+  };
+  \addlegendentry{OLED}
+  
+  \addplot[fill=successcolor] coordinates {
+    (Black,3.8) (Dark UI,4.1) (Mixed,4.3) (Web,4.5) (White,4.8)
+  };
+  \addlegendentry{LCD}
+  
+  \end{axis}
+\end{tikzpicture}
+\caption{Content-dependent power consumption for OLED vs LCD. LCD power is nearly constant (backlight), while OLED scales with content brightness.}
+\end{figure}
+

@@ -1,0 +1,23 @@
+\chapter{Micro-LED Future Technology}
+\section{Advantages Over OLED}
+\begin{itemize}
+\item No burn-in (inorganic)
+\item Higher brightness (>10,000 nits)
+\item Longer lifetime (100,000+ hours)
+\item Better efficiency
+\item Wider temperature range
+\end{itemize}
+
+\section{Mass Transfer Yield Challenge}
+\begin{formulabox}{Panel Yield Sensitivity}
+If each subpixel transfer has success probability $p$ and the panel requires $N$ subpixels:
+\begin{equation}
+Y_{\text{panel}} = p^N
+\end{equation}
+For a 4K RGB panel, $N \approx 3 \times 3840 \times 2160 = 24{,}883{,}200$.
+\end{formulabox}
+
+\begin{importantbox}{Manufacturing Implication}
+Even very high single-transfer yield can produce near-zero full-panel yield without redundancy and laser repair. This is why transfer, inspection, and repair tooling define micro-LED cost more than emitter physics alone.
+\end{importantbox}
+
